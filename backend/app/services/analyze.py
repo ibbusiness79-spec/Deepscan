@@ -3,6 +3,7 @@ from app.services.schemas import AnalyzeRequest
 from app.services.nlp_engine import analyze_nlp
 from app.services.source_engine import score_source
 from app.services.factcheck_engine import score_fact_check
+from app.services.evidence_engine import score_evidence
 
 TRANSLATIONS = {
     "en": {
@@ -92,6 +93,7 @@ def analyze_content(payload: AnalyzeRequest):
     nlp_score, nlp_expl, nlp_signals = analyze_nlp(content, lang)
     source_score, source_expl, source_signals, source_applicable = score_source(content, lang)
     fact_score, fact_expl, fact_signals = score_fact_check(content, lang)
+    evidence_score, evidence_expl, evidence_signals = score_evidence(content, lang)
 
     image_score, image_expl, image_signals, image_applicable = score_image(
         content if payload.type in {"image", "video"} else "", lang
@@ -106,7 +108,7 @@ def analyze_content(payload: AnalyzeRequest):
         "others": 0.3,
     }
 
-    others_avg = round((fact_score + image_score + deepfake_score) / 3, 3)
+    others_avg = round((fact_score + image_score + deepfake_score + evidence_score) / 4, 3)
     final_score = round(
         nlp_score * weights["nlp"] + source_score * weights["source"] + others_avg * weights["others"],
         3,
@@ -157,6 +159,12 @@ def analyze_content(payload: AnalyzeRequest):
                 "explanation": deepfake_expl,
                 "signals": deepfake_signals,
                 "applicable": deepfake_applicable,
+            },
+            "evidence": {
+                "score": evidence_score,
+                "explanation": evidence_expl,
+                "signals": evidence_signals,
+                "applicable": True,
             },
         },
     }

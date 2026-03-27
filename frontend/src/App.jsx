@@ -120,6 +120,22 @@ const formatSignals = (key, signals) => {
     lines.push(`Flags: ${flags}.`);
   }
 
+  if (key === "evidence") {
+    if (signals.status) {
+      lines.push(`Status: ${signals.status}.`);
+    }
+    if (signals.provider) {
+      lines.push(`Provider: ${signals.provider}.`);
+    }
+    if (signals.matches?.length) {
+      const sourceList = signals.matches
+        .slice(0, 3)
+        .map((m) => `${m.title} (${m.domain})`)
+        .join("; ");
+      lines.push(`Sources: ${sourceList}.`);
+    }
+  }
+
   if (!lines.length) {
     return JSON.stringify(signals);
   }

@@ -4,6 +4,7 @@
 - NLP Analysis: uses OpenAI or offline HuggingFace (with heuristic fallback) to detect emotional manipulation, clickbait, and bias.
 - Source Analysis: checks HTTPS, suspicious patterns, reputation lists, local press ranking score, and optional WHOIS domain age.
 - Fact-Check (real): uses Google Fact Check Tools API when API key is set, with graceful fallback.
+- Web Evidence (real): uses Bing Web Search API to fetch public sources for claim grounding.
 - Computer Vision (mock): simulates metadata and manipulation checks.
 - Deepfake Detection (mock): simulates blink and facial anomaly checks.
 

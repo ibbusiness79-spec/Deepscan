@@ -79,6 +79,20 @@ Optional tuning:
 - `FACTCHECK_PAGE_SIZE` (default `3`)
 - `FACTCHECK_MAX_AGE_DAYS` (default `3650`)
 
+## Web Evidence Search (Real)
+We can enrich scoring with web evidence using Bing Web Search API.
+
+Enable:
+```bash
+set EVIDENCE_PROVIDER=bing
+set BING_API_KEY=your_key
+```
+
+Optional tuning:
+- `BING_ENDPOINT` (default `https://api.bing.microsoft.com/v7.0/search`)
+- `EVIDENCE_TIMEOUT` (default `2.5`)
+- `EVIDENCE_COUNT` (default `5`)
+
 ## Frontend Setup
 ```bash
 cd frontend
