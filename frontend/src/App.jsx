@@ -59,6 +59,73 @@ const verdictStyles = {
   Faux: "bg-ember/20 text-ember border-ember"
 };
 
+const formatSignals = (key, signals) => {
+  if (!signals || typeof signals !== "object") return "-";
+
+  const lines = [];
+
+  if (signals.provider) {
+    lines.push(`Provider: ${signals.provider}${signals.model ? ` (${signals.model})` : ""}`);
+  }
+
+  if (key === "nlp") {
+    const emotional = signals.emotional_words?.length ? signals.emotional_words.join(", ") : "none";
+    const clickbait = signals.clickbait_patterns?.length ? signals.clickbait_patterns.join(", ") : "none";
+    const bias = signals.bias_words?.length ? signals.bias_words.join(", ") : "none";
+    lines.push(`Emotional words: ${emotional}.`);
+    lines.push(`Clickbait patterns: ${clickbait}.`);
+    lines.push(`Bias/absolute words: ${bias}.`);
+  }
+
+  if (key === "source") {
+    lines.push(`Domain: ${signals.domain || "-"}.`);
+    lines.push(`HTTPS: ${signals.https ? "yes" : "no"}.`);
+    if (signals.shortener !== undefined) {
+      lines.push(`Shortener: ${signals.shortener ? "yes" : "no"}.`);
+    }
+    if (signals.punycode !== undefined) {
+      lines.push(`Punycode: ${signals.punycode ? "yes" : "no"}.`);
+    }
+    if (signals.ip_domain !== undefined) {
+      lines.push(`IP domain: ${signals.ip_domain ? "yes" : "no"}.`);
+    }
+    if (signals.suspicious_keywords) {
+      const sk = signals.suspicious_keywords.length ? signals.suspicious_keywords.join(", ") : "none";
+      lines.push(`Suspicious keywords: ${sk}.`);
+    }
+    if (signals.reputation) {
+      lines.push(`Trusted list: ${signals.reputation.trusted ? "yes" : "no"}.`);
+      lines.push(`Suspicious list: ${signals.reputation.suspicious ? "yes" : "no"}.`);
+      if (signals.reputation.press_rank_score !== undefined) {
+        lines.push(`Press rank score: ${signals.reputation.press_rank_score}.`);
+      }
+    }
+    if (signals.whois) {
+      lines.push(`WHOIS enabled: ${signals.whois.enabled ? "yes" : "no"}.`);
+      if (signals.whois.age_days !== null && signals.whois.age_days !== undefined) {
+        lines.push(`Domain age: ${signals.whois.age_days} days.`);
+      }
+    }
+  }
+
+  if (key === "fact_check") {
+    lines.push(`Status: ${signals.status || "-"}.`);
+    if (signals.match) {
+      lines.push(`Matched claim: ${signals.match}.`);
+    }
+  }
+
+  if (key === "image" || key === "deepfake") {
+    const flags = signals.flags?.length ? signals.flags.join(", ") : "none";
+    lines.push(`Flags: ${flags}.`);
+  }
+
+  if (!lines.length) {
+    return JSON.stringify(signals);
+  }
+  return lines.join(" ");
+};
+
 export default function App() {
   const [lang, setLang] = useState("fr");
   const [type, setType] = useState("text");
@@ -239,9 +306,9 @@ export default function App() {
                       <span className="text-slate-300 text-sm">{Math.round(module.score * 100)}%</span>
                     </div>
                     <p className="text-slate-300 text-sm mt-2">{module.explanation}</p>
-                    <pre className="text-xs text-slate-400 mt-3 whitespace-pre-wrap">
-                      {JSON.stringify(module.signals, null, 2)}
-                    </pre>
+                    <p className="text-xs text-slate-400 mt-3 whitespace-pre-wrap">
+                      {formatSignals(key, module.signals)}
+                    </p>
                   </div>
                 ))
               : "-"}
