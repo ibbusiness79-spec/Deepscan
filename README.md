@@ -66,6 +66,19 @@ Data files:
 - `data/domains_suspicious.json`
 - `data/press_rankings.json`
 
+## Fact-Checking API (Real)
+We use Google Fact Check Tools API when `FACTCHECK_API_KEY` is set.
+
+Enable:
+```bash
+set FACTCHECK_API_KEY=your_key
+```
+
+Optional tuning:
+- `FACTCHECK_TIMEOUT` (default `2.5` seconds)
+- `FACTCHECK_PAGE_SIZE` (default `3`)
+- `FACTCHECK_MAX_AGE_DAYS` (default `3650`)
+
 ## Frontend Setup
 ```bash
 cd frontend

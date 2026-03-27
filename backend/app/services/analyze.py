@@ -2,6 +2,7 @@
 from app.services.schemas import AnalyzeRequest
 from app.services.nlp_engine import analyze_nlp
 from app.services.source_engine import score_source
+from app.services.factcheck_engine import score_fact_check
 
 TRANSLATIONS = {
     "en": {
@@ -30,31 +31,6 @@ def detect_language(text: str) -> str:
     fr_score = sum(1 for m in french_markers if m in text_lower)
     en_score = sum(1 for m in english_markers if m in text_lower)
     return "fr" if fr_score >= en_score else "en"
-
-
-def score_fact_check(text: str, lang: str):
-    text_lower = text.lower()
-    simulated_false = ["miracle cure", "secret government", "puce 5g", "vaccin tue"]
-    match = next((p for p in simulated_false if p in text_lower), None)
-
-    if match:
-        score = 0.2
-        explanation = (
-            "Simulated fact-check found similar claim rated false."
-            if lang == "en"
-            else "Vérification simulée: un énoncé similaire est jugé faux."
-        )
-        signals = {"match": match, "status": "false"}
-    else:
-        score = 0.6
-        explanation = (
-            "No matching fact-check found in the simulated database."
-            if lang == "en"
-            else "Aucun résultat trouvé dans la base simulée de fact-checking."
-        )
-        signals = {"status": "not_found"}
-
-    return score, explanation, signals
 
 
 def score_image(content: str, lang: str):
