@@ -115,6 +115,25 @@ const formatSignals = (key, signals) => {
     }
   }
 
+  if (key === "evidence") {
+    lines.push(`Provider: ${signals.provider || "-"}.`);
+    if (signals.query) {
+      lines.push(`Query: ${signals.query}.`);
+    }
+    if (signals.trusted_hits !== undefined) {
+      lines.push(`Trusted sources: ${signals.trusted_hits}.`);
+    }
+    if (signals.suspicious_hits !== undefined) {
+      lines.push(`Suspicious sources: ${signals.suspicious_hits}.`);
+    }
+    if (signals.matches?.length) {
+      const domains = signals.matches.map((m) => m.domain).filter(Boolean);
+      if (domains.length) {
+        lines.push(`Top domains: ${[...new Set(domains)].slice(0, 4).join(", ")}.`);
+      }
+    }
+  }
+
   if (key === "image" || key === "deepfake") {
     const flags = signals.flags?.length ? signals.flags.join(", ") : "none";
     lines.push(`Flags: ${flags}.`);

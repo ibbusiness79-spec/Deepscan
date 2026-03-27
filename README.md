@@ -80,12 +80,18 @@ Optional tuning:
 - `FACTCHECK_MAX_AGE_DAYS` (default `3650`)
 
 ## Web Evidence Search (Real)
-We can enrich scoring with web evidence using Bing Web Search API.
+We can enrich scoring with web evidence using Bing Web Search API or SerpAPI.
 
-Enable:
+Enable (Bing):
 ```bash
 set EVIDENCE_PROVIDER=bing
 set BING_API_KEY=your_key
+```
+
+Enable (SerpAPI):
+```bash
+set EVIDENCE_PROVIDER=serpapi
+set SERPAPI_API_KEY=your_key
 ```
 
 Optional tuning:
