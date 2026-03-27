@@ -1,0 +1,22 @@
+﻿{
+  "fake_news_samples": [
+    {
+      "lang": "en",
+      "text": "BREAKING: You won't believe this miracle cure. Secret government lab confirms it works overnight."
+    },
+    {
+      "lang": "fr",
+      "text": "INCROYABLE: ce vaccin tue, ne ratez pas cette révélation choquante."
+    }
+  ],
+  "real_news_samples": [
+    {
+      "lang": "en",
+      "text": "Reuters reports that regional leaders met today to discuss food security and drought response."
+    },
+    {
+      "lang": "fr",
+      "text": "France 24 rapporte un accord régional sur la sécurité alimentaire signé ce matin."
+    }
+  ]
+}

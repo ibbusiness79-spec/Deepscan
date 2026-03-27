@@ -1,0 +1,47 @@
+﻿@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  font-family: "DM Sans", system-ui, sans-serif;
+  background: radial-gradient(1200px 600px at 10% 10%, rgba(110, 168, 255, 0.25), transparent 60%),
+    radial-gradient(900px 500px at 90% 20%, rgba(27, 207, 180, 0.2), transparent 55%),
+    #0b0f1a;
+  min-height: 100vh;
+}
+
+.glass {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  backdrop-filter: blur(16px);
+}
+
+.badge {
+  @apply px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide;
+}
+
+.progress-ring {
+  --value: 0.75;
+  width: 120px;
+  height: 120px;
+  border-radius: 999px;
+  background: conic-gradient(#1bcfb4 calc(var(--value) * 360deg), rgba(148, 163, 184, 0.2) 0);
+  display: grid;
+  place-items: center;
+}
+
+.progress-ring > div {
+  width: 92px;
+  height: 92px;
+  border-radius: 999px;
+  background: #0b0f1a;
+  display: grid;
+  place-items: center;
+  font-family: "Space Grotesk", system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 1.4rem;
+}
