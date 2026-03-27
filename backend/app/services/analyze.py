@@ -1,12 +1,7 @@
 ﻿import re
-from urllib.parse import urlparse
 from app.services.schemas import AnalyzeRequest
 from app.services.nlp_engine import analyze_nlp
-
-SUSPICIOUS_DOMAIN_KEYWORDS = {"free", "giveaway", "click", "viral", "buzz", "breaking", "news", "urgent"}
-CREDIBLE_DOMAINS = {
-    "bbc.com", "reuters.com", "apnews.com", "france24.com", "lemonde.fr", "rfi.fr", "afp.com"
-}
+from app.services.source_engine import score_source
 
 TRANSLATIONS = {
     "en": {
@@ -35,43 +30,6 @@ def detect_language(text: str) -> str:
     fr_score = sum(1 for m in french_markers if m in text_lower)
     en_score = sum(1 for m in english_markers if m in text_lower)
     return "fr" if fr_score >= en_score else "en"
-
-
-def score_source(content: str, lang: str):
-    parsed = urlparse(content) if content.startswith("http") else None
-    if not parsed:
-        return 0.5, TRANSLATIONS[lang]["not_applicable"], {"reason": "not_url"}, False
-
-    domain = parsed.netloc.lower().replace("www.", "")
-    has_https = parsed.scheme == "https"
-    suspicious_hits = [k for k in SUSPICIOUS_DOMAIN_KEYWORDS if k in domain]
-    credible = domain in CREDIBLE_DOMAINS
-
-    risk = 0.0
-    if not has_https:
-        risk += 0.2
-    if suspicious_hits:
-        risk += min(0.4, 0.1 * len(suspicious_hits))
-    if credible:
-        risk -= 0.2
-    if len(domain) > 25:
-        risk += 0.1
-
-    risk = min(1.0, max(0.0, risk))
-    score = round(1.0 - risk, 3)
-
-    explanation = (
-        "We check domain credibility, HTTPS security, and suspicious keywords."
-        if lang == "en"
-        else "Nous vérifions la crédibilité du domaine, HTTPS et les mots-clés suspects."
-    )
-    signals = {
-        "domain": domain,
-        "https": has_https,
-        "suspicious_keywords": suspicious_hits,
-        "credible_domain": credible,
-    }
-    return score, explanation, signals, True
 
 
 def score_fact_check(text: str, lang: str):

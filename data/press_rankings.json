@@ -1,0 +1,21 @@
+﻿{
+  "bf": [
+    {"domain": "lefaso.net", "score": 0.6},
+    {"domain": "sidwaya.info", "score": 0.6}
+  ],
+  "ci": [
+    {"domain": "fratmat.info", "score": 0.55}
+  ],
+  "sn": [
+    {"domain": "seneweb.com", "score": 0.5}
+  ],
+  "global": [
+    {"domain": "bbc.com", "score": 0.8},
+    {"domain": "reuters.com", "score": 0.85},
+    {"domain": "apnews.com", "score": 0.8},
+    {"domain": "france24.com", "score": 0.75},
+    {"domain": "lemonde.fr", "score": 0.75},
+    {"domain": "rfi.fr", "score": 0.7},
+    {"domain": "afp.com", "score": 0.8}
+  ]
+}

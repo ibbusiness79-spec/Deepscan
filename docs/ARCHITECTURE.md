@@ -2,7 +2,7 @@
 
 ## Modules
 - NLP Analysis: uses OpenAI or offline HuggingFace (with heuristic fallback) to detect emotional manipulation, clickbait, and bias.
-- Source Analysis: checks domain credibility, HTTPS, suspicious keywords.
+- Source Analysis: checks HTTPS, suspicious patterns, reputation lists, local press ranking score, and optional WHOIS domain age.
 - Fact-Check (simulated): searches a mock database of known claims.
 - Computer Vision (mock): simulates metadata and manipulation checks.
 - Deepfake Detection (mock): simulates blink and facial anomaly checks.

@@ -50,6 +50,22 @@ Offline HuggingFace configuration:
 - `pip install -r requirements-ml.txt`
 - `HF_SENTIMENT_MODEL` (default `nlptown/bert-base-multilingual-uncased-sentiment`)
 
+## URL Source Analysis Enhancements
+The URL analyzer now supports:
+- WHOIS domain age (optional)
+- Reputation lists (trusted/suspicious domains)
+- Local press ranking score (editable JSON)
+
+Enable WHOIS (optional):
+```bash
+set ENABLE_WHOIS=true
+```
+
+Data files:
+- `data/domains_trusted.json`
+- `data/domains_suspicious.json`
+- `data/press_rankings.json`
+
 ## Frontend Setup
 ```bash
 cd frontend
