@@ -1,16 +1,8 @@
 ﻿import re
 from urllib.parse import urlparse
 from app.services.schemas import AnalyzeRequest
+from app.services.nlp_engine import analyze_nlp
 
-EMOTIONAL_WORDS = {
-    "shocking", "outrage", "panic", "anger", "hate", "amazing", "incroyable", "choquant",
-    "scandale", "honte", "terreur", "urgent", "breaking", "révélation", "catastrophe"
-}
-CLICKBAIT_PATTERNS = [
-    r"you won't believe", r"what happens next", r"shocking truth", r"incroyable", r"à couper le souffle",
-    r"ne ratez pas", r"cliquez ici", r"vous ne devinerez jamais"
-]
-BIAS_WORDS = {"always", "never", "everyone", "nobody", "tous", "personne", "jamais"}
 SUSPICIOUS_DOMAIN_KEYWORDS = {"free", "giveaway", "click", "viral", "buzz", "breaking", "news", "urgent"}
 CREDIBLE_DOMAINS = {
     "bbc.com", "reuters.com", "apnews.com", "france24.com", "lemonde.fr", "rfi.fr", "afp.com"
@@ -43,32 +35,6 @@ def detect_language(text: str) -> str:
     fr_score = sum(1 for m in french_markers if m in text_lower)
     en_score = sum(1 for m in english_markers if m in text_lower)
     return "fr" if fr_score >= en_score else "en"
-
-
-def score_nlp(text: str, lang: str):
-    text_lower = text.lower()
-    emotional_hits = [w for w in EMOTIONAL_WORDS if w in text_lower]
-    clickbait_hits = [p for p in CLICKBAIT_PATTERNS if re.search(p, text_lower)]
-    bias_hits = [w for w in BIAS_WORDS if w in text_lower]
-
-    risk = 0.0
-    risk += min(0.4, 0.1 * len(emotional_hits))
-    risk += min(0.4, 0.2 * len(clickbait_hits))
-    risk += min(0.2, 0.05 * len(bias_hits))
-    risk = min(1.0, risk)
-    score = round(1.0 - risk, 3)
-
-    explanation = (
-        "Emotional manipulation, clickbait phrases, and absolute language can signal misinformation."
-        if lang == "en"
-        else "La manipulation émotionnelle, le clickbait et le langage absolu sont des signaux de désinformation."
-    )
-    signals = {
-        "emotional_words": emotional_hits,
-        "clickbait_patterns": clickbait_hits,
-        "bias_words": bias_hits,
-    }
-    return score, explanation, signals
 
 
 def score_source(content: str, lang: str):
@@ -189,7 +155,7 @@ def analyze_content(payload: AnalyzeRequest):
     content = payload.content.strip()
     lang = detect_language(content)
 
-    nlp_score, nlp_expl, nlp_signals = score_nlp(content, lang)
+    nlp_score, nlp_expl, nlp_signals = analyze_nlp(content, lang)
     source_score, source_expl, source_signals, source_applicable = score_source(content, lang)
     fact_score, fact_expl, fact_signals = score_fact_check(content, lang)
 

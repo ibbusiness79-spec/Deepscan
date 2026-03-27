@@ -1,7 +1,7 @@
 ﻿# DeepScan AI Architecture
 
 ## Modules
-- NLP Analysis: detects emotional manipulation, clickbait, and bias.
+- NLP Analysis: uses OpenAI or offline HuggingFace (with heuristic fallback) to detect emotional manipulation, clickbait, and bias.
 - Source Analysis: checks domain credibility, HTTPS, suspicious keywords.
 - Fact-Check (simulated): searches a mock database of known claims.
 - Computer Vision (mock): simulates metadata and manipulation checks.

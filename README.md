@@ -36,6 +36,20 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
 
+## NLP Providers (OpenAI + Offline HF)
+The NLP module supports three modes via environment variables:
+- `NLP_PROVIDER=auto` (default): OpenAI if available, else HuggingFace, else heuristic.
+- `NLP_PROVIDER=openai`: force OpenAI.
+- `NLP_PROVIDER=hf`: force offline HuggingFace.
+
+OpenAI configuration:
+- `OPENAI_API_KEY` (required for OpenAI)
+- `OPENAI_MODEL` (default `gpt-4.1-mini`)
+
+Offline HuggingFace configuration:
+- `pip install -r requirements-ml.txt`
+- `HF_SENTIMENT_MODEL` (default `nlptown/bert-base-multilingual-uncased-sentiment`)
+
 ## Frontend Setup
 ```bash
 cd frontend
