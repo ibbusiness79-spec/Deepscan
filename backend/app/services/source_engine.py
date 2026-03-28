@@ -2,7 +2,7 @@
 import os
 import re
 from datetime import datetime
-from urllib.parse import urlparse
+from urllib.parse import urlparse, parse_qs
 
 try:
     import whois
@@ -14,6 +14,7 @@ SUSPICIOUS_KEYWORDS = {
 }
 URL_SHORTENERS = {"bit.ly", "t.co", "tinyurl.com", "goo.gl", "ow.ly", "is.gd"}
 IP_REGEX = re.compile(r"^\d{1,3}(\.\d{1,3}){3}$")
+RISKY_PATH_TOKENS = {"login", "verify", "update", "redirect", "secure", "account"}
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 DATA_DIR = os.path.join(BASE_DIR, "..", "..", "data")
@@ -63,6 +64,12 @@ def score_source(url: str, lang: str):
 
     domain = domain_from_url(url)
     parsed = urlparse(url)
+    query_params = parse_qs(parsed.query or "")
+    param_count = len(query_params.keys())
+    url_length = len(url)
+    has_at = "@" in url
+    path_tokens = set(re.findall(r"[a-zA-Z]+", parsed.path.lower()))
+    risky_path = bool(path_tokens & RISKY_PATH_TOKENS)
 
     trusted = set(load_json("domains_trusted.json", []))
     suspicious = set(load_json("domains_suspicious.json", []))
@@ -76,27 +83,41 @@ def score_source(url: str, lang: str):
     hyphen_count = domain.count("-")
     digit_count = sum(c.isdigit() for c in domain)
 
-    risk = 0.0
-    if not has_https:
-        risk += 0.2
-    if suspicious_hits:
-        risk += min(0.3, 0.05 * len(suspicious_hits))
-    if is_shortener:
-        risk += 0.15
-    if has_ip:
-        risk += 0.25
-    if has_punycode:
-        risk += 0.2
-    if hyphen_count >= 2:
-        risk += 0.1
-    if digit_count >= 3:
-        risk += 0.1
+    # Deterministic scoring model
+    base_score = 0.5
+    bonuses = []
+    penalties = []
 
-    reputation_bonus = 0.0
+    if has_https:
+        bonuses.append(("https", 0.1))
+    else:
+        penalties.append(("no_https", 0.1))
+
     if domain in trusted:
-        reputation_bonus += 0.2
+        bonuses.append(("trusted_domain", 0.2))
     if domain in suspicious:
-        risk += 0.2
+        penalties.append(("suspicious_domain", 0.2))
+
+    if suspicious_hits:
+        penalties.append(("suspicious_keywords", min(0.2, 0.05 * len(suspicious_hits))))
+    if is_shortener:
+        penalties.append(("url_shortener", 0.12))
+    if has_ip:
+        penalties.append(("ip_domain", 0.2))
+    if has_punycode:
+        penalties.append(("punycode", 0.15))
+    if hyphen_count >= 2:
+        penalties.append(("many_hyphens", 0.05))
+    if digit_count >= 3:
+        penalties.append(("many_digits", 0.05))
+    if url_length > 90:
+        penalties.append(("long_url", 0.05))
+    if param_count >= 3:
+        penalties.append(("many_params", 0.05))
+    if has_at:
+        penalties.append(("at_symbol", 0.1))
+    if risky_path:
+        penalties.append(("risky_path_tokens", 0.05))
 
     rank_score = 0.0
     for country, entries in rankings.items():
@@ -104,7 +125,8 @@ def score_source(url: str, lang: str):
             if entry.get("domain") == domain:
                 rank_score = max(rank_score, float(entry.get("score", 0.0)))
 
-    reputation_bonus += min(0.2, rank_score)
+    if rank_score > 0:
+        bonuses.append(("press_rank", min(0.2, rank_score)))
 
     whois_enabled = os.getenv("ENABLE_WHOIS", "false").lower() == "true"
     age_days = None
@@ -112,19 +134,20 @@ def score_source(url: str, lang: str):
         age_days = whois_age_days(domain)
         if age_days is not None:
             if age_days < 90:
-                risk += 0.2
+                penalties.append(("whois_new_domain", 0.15))
             elif age_days < 365:
-                risk += 0.1
+                penalties.append(("whois_young_domain", 0.08))
             else:
-                reputation_bonus += 0.05
+                bonuses.append(("whois_mature_domain", 0.05))
 
-    risk = min(1.0, max(0.0, risk - reputation_bonus))
-    score = round(1.0 - risk, 3)
+    bonus_total = sum(b for _, b in bonuses)
+    penalty_total = sum(p for _, p in penalties)
+    score = round(min(1.0, max(0.0, base_score + bonus_total - penalty_total)), 3)
 
     explanation = (
-        "We check HTTPS, suspicious patterns, reputation lists, press rankings, and optional WHOIS age."
+        "Source score is computed from HTTPS, reputation lists, URL patterns, press ranking, and WHOIS (optional)."
         if lang == "en"
-        else "Nous vérifions HTTPS, signaux suspects, réputation, classement presse et l'âge WHOIS (optionnel)."
+        else "Le score source est calculé via HTTPS, réputation, motifs d'URL, classement presse et WHOIS (optionnel)."
     )
 
     signals = {
@@ -136,6 +159,10 @@ def score_source(url: str, lang: str):
         "punycode": has_punycode,
         "hyphen_count": hyphen_count,
         "digit_count": digit_count,
+        "url_length": url_length,
+        "param_count": param_count,
+        "risky_path": risky_path,
+        "has_at_symbol": has_at,
         "reputation": {
             "trusted": domain in trusted,
             "suspicious": domain in suspicious,
@@ -144,6 +171,13 @@ def score_source(url: str, lang: str):
         "whois": {
             "enabled": whois_enabled,
             "age_days": age_days,
+        },
+        "score_breakdown": {
+            "base": base_score,
+            "bonuses": bonuses,
+            "penalties": penalties,
+            "bonus_total": round(bonus_total, 3),
+            "penalty_total": round(penalty_total, 3),
         },
     }
 

@@ -106,6 +106,18 @@ const formatSignals = (key, signals) => {
         lines.push(`Domain age: ${signals.whois.age_days} days.`);
       }
     }
+    if (signals.score_breakdown) {
+      lines.push(`Base: ${signals.score_breakdown.base}.`);
+      if (signals.score_breakdown.bonuses?.length) {
+        const b = signals.score_breakdown.bonuses.map((i) => `${i[0]}(+${i[1]})`).join(", ");
+        lines.push(`Bonuses: ${b}.`);
+      }
+      if (signals.score_breakdown.penalties?.length) {
+        const p = signals.score_breakdown.penalties.map((i) => `${i[0]}(-${i[1]})`).join(", ");
+        lines.push(`Penalties: ${p}.`);
+      }
+      lines.push(`Totals: +${signals.score_breakdown.bonus_total}, -${signals.score_breakdown.penalty_total}.`);
+    }
   }
 
   if (key === "fact_check") {
